@@ -12,7 +12,6 @@ const curso = (req, res)=>{
     return res.status(200).json({
         mensaje: "Soy una accion de prueba en mi controlador de articulos"
     });
-
 }
 
 
@@ -33,6 +32,7 @@ const crear = (req, res)=>{
         mensaje: "Acción de guardar"
     });
 }
+
 
 module.exports = {
     prueba,
