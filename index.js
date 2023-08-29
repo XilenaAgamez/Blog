@@ -16,7 +16,8 @@ const puerto = 3900;
 app.use(cors());
 
 //convertir body a objeto js
-app.use(express.json());
+app.use(express.json());//recibir datos con content-type app/json
+app.use(express.urlencoded({extended:true})); // urlencoded
 
 //Rutas
 const rutas_articulos = require("./rutas/articulo");
@@ -33,6 +34,7 @@ app.get("/prueba", (req, res) =>{
         autor: "xilena"
     })
 });
+
 
 //crear servidor y escuchar peticiones
 app.listen(puerto, ()=>{

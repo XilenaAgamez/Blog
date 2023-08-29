@@ -5,6 +5,7 @@ const ArticuloSchema = Schema({
         type:String,
         required: true
     },
+    
     contenido:{
         type:String,
         required: true

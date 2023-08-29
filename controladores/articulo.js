@@ -1,41 +1,163 @@
+const validator = require("validator");
+const Articulo = require("../modelos/Articulo");
 
-const prueba = (req, res)=>{
 
-    return res.status(200).json({
-        mensaje: "Soy una accion de prueba en mi controlador de articulos"
-    });
+const crear = async function(req,res){
+    var parametros = req.body;
 
+    try {
+        let validar_titulo =! validator.isEmpty(parametros.titulo) &&
+                              validator.isLength(parametros.titulo, {min:5, max: undefined});
+        let validar_contenido =! validator.isEmpty(parametros.contenido);
+
+        if(!validar_titulo || !validar_contenido){
+            throw new Error("No se ha validado la informacion");
+        }
+        
+    } catch (error) {
+        return res.status(400).json({
+            statu: "Error",
+            mensaje: "Faltan datos"
+        });
+    }
+  
+    //registro
+    try{    
+        var reg = await Articulo.create(parametros);
+        /*res.status(200).send({parametros:reg});*/
+
+        return res.status(200).json({
+            status: "success",
+            parametros:reg,
+            mensaje: "Articulo guardado con exito"
+        });
+
+    }catch (error) {
+        return res.status(400).json({
+            statu: "Error",
+            mensaje: "No se pudo guardar el registro"
+        });
+    }
 }
 
-const curso = (req, res)=>{
 
-    return res.status(200).json({
-        mensaje: "Soy una accion de prueba en mi controlador de articulos"
+const listar = async function(req,res){
+    await Articulo.find({})    
+    //limit: permite listar solo cantidad limitada en este caso 3
+    //sort: Permite organizar por el campo que deseemos en este caso fecha de manera descendente
+    .limit(3)
+    .sort({fecha: -1})
+
+    .then((articulos) => {
+        return res.status(200).json({
+            status: "success",
+            contador: articulos.length,
+            articulos
+        });
+       
+    }).catch((error) => {
+        return res.status(400).json({
+            status: "error",
+            mensaje: "No se han encontrado articulox"
+        });
     });
 }
 
 
-const crear = (req, res)=>{
-    // Recoger parametros a guardar
-
-    // Validar datos
-
-    // crear objeto a guardar
-
-    // Asignar valores a objeto basado en el modelo(manual o automatico)
-
-    // Guardar articulo en la base de datos
-
-    // Devolver resultados
-
-    return res.status(200).json({
-        mensaje: "Acción de guardar"
-    });
+const uno = async function(req,res){
+    //Recoger un Id por URL
+    let id = req.params.id;
+    //Buscar el articulo
+    await Articulo.findById(id) 
+    .then((articulo) => {
+        return res.status(200).json({
+            status: "success",
+            articulo
+        });
+       
+    }).catch((error) => {
+        return res.status(400).json({
+            status: "error",
+            mensaje: "No se han encontrado articulox"
+        });
+    
+    })
+   
 }
 
+
+
+const eliminar = async  function(req, res){
+    let art_id = req.params.id;
+
+    Articulo.findByIdAndDelete({_id: art_id})
+
+    .then((articuloBorrado) => {
+        return res.status(200).json({
+            status: "succes",
+            articulo: articuloBorrado,
+            mensaje: "Mensaje de borrado"
+        })
+       
+    }).catch((error) => {
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al borrar"
+        });
+    
+    })
+}
+
+
+const editar = async function(req, res){
+    //Recoger el id a editar
+    let art_id = req.params.id;
+
+    //Recoger datos del body
+    let parametros = req.body
+
+    //Validar datos 
+    try {
+        let validar_titulo =! validator.isEmpty(parametros.titulo) &&
+                              validator.isLength(parametros.titulo, {min:5, max: undefined});
+        let validar_contenido =! validator.isEmpty(parametros.contenido);
+
+        if(!validar_titulo || !validar_contenido){
+            throw new Error("No se ha validado la informacion");
+        }
+        
+    } catch (error) {
+        return res.status(400).json({
+            statu: "Error",
+            mensaje: "Faltan datos"
+        });
+    }
+
+    //Buscar y actualizar articulo
+    Articulo.findByIdAndUpdate({_id: art_id}, parametros)
+    //Devolver respuesta
+    .then((articuloeditado) => {
+        return res.status(200).json({
+            status: "succes",
+            articulo: articuloeditado,
+            mensaje: "Articulo editado"
+        })
+       
+    }).catch((error) => {
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al editar"
+        });
+    
+    });
+
+
+}
 
 module.exports = {
-    prueba,
-    curso,
-    crear
+    crear,
+    listar,
+    uno,
+    eliminar,
+    editar
 }
