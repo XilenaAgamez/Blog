@@ -1,3 +1,4 @@
+const fs = require("fs");
 const validator = require("validator");
 const Articulo = require("../modelos/Articulo");
 
@@ -112,7 +113,6 @@ const eliminar = async  function(req, res){
 const editar = async function(req, res){
     //Recoger el id a editar
     let art_id = req.params.id;
-
     //Recoger datos del body
     let parametros = req.body
 
@@ -134,7 +134,7 @@ const editar = async function(req, res){
     }
 
     //Buscar y actualizar articulo
-    Articulo.findByIdAndUpdate({_id: art_id}, parametros)
+    Articulo.findByIdAndUpdate({_id: art_id}, parametros, {new: true})
     //Devolver respuesta
     .then((articuloeditado) => {
         return res.status(200).json({
@@ -150,14 +150,57 @@ const editar = async function(req, res){
         });
     
     });
-
-
 }
+
+const subir = async function(req, res){
+
+    //configurar multer
+
+    //recoger el fichero de imagen subido
+
+    if(!req.file || !req.files){
+        return res.status(404).json({
+            status: "Error",
+            mensaje: "Peticion invalida"
+        });
+
+    }
+
+    //Nombre del archivo
+    let archivo= req.file.originalname;
+
+    //Extension del archivo
+    let archivo_split = archivo.split("\.");
+    let extension = archivo_split[1];
+
+    //Comprobar extension correcta
+
+    if(extension != "png" && extension != "jpg" 
+        && extension!= "jpeg" && extension !="gif"){
+            //Borrar archivo y dar respuesta
+            fs.unlink(req.file.path, (error) =>{
+                return res.status(400).json({
+                    status: "Error",
+                    mensaje : "Imagen invalida"
+                });
+            })
+    }else{
+         //Si todo va bien vamos actualzar el archivo
+        return res.status(200).json({
+            status: "ok",
+            archivo_split,
+            files: req.file
+        });
+    }
+}
+
+
 
 module.exports = {
     crear,
     listar,
     uno,
     eliminar,
-    editar
+    editar,
+    subir
 }
