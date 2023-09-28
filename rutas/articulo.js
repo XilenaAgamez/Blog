@@ -6,18 +6,16 @@ const ArticuloControlador = require("../controladores/articulo");
 
 
 const almacenamiento = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: function(req, file, cb) {
         cb(null, './imagenes/articulos/');
     },
 
-    filename:(req, file, cb) => {
+    filename: function(req, file, cb){
         cb(null, "articulo" + Date.now() + file.originalname)
     }
 })
 
 const subidas = multer({storage: almacenamiento});
-
-
 
 
 //ruta util
@@ -27,5 +25,6 @@ router.get("/articulo/:id", ArticuloControlador.uno);
 router.delete("/articulo/:id", ArticuloControlador.eliminar);
 router.put("/articulo/:id", ArticuloControlador.editar);
 router.post("/subir_imagen/:id", [subidas.single("file")], ArticuloControlador.subir)
-
+router.get("/imagen/:fichero", ArticuloControlador.imagen);
+router.get("/buscar/:busqueda", ArticuloControlador.buscar)
 module.exports = router;
